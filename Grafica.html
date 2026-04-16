@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Intentos fallidos de login</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+    body {
+        font-family: Arial;
+        background-color: #f4f4f4;
+        text-align: center;
+        padding: 30px;
+    }
+
+    .container {
+        width: 80%;
+        margin: auto;
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+    }
+
+    input {
+        padding: 10px;
+        font-size: 16px;
+        margin: 10px;
+        width: 100px;
+        text-align: center;
+    }
+
+    button {
+        padding: 10px 20px;
+        font-size: 16px;
+        cursor: pointer;
+    }
+</style>
+</head>
+
+<body>
+
+<div class="container">
+    <h1>Acumulación de Intentos Fallidos</h1>
+
+    <p>Ingrese el tiempo (minutos):</p>
+    <input type="number" id="tiempoInput" value="4" min="1">
+    <button onclick="generarGrafica()">Generar gráfica</button>
+
+    <canvas id="grafica"></canvas>
+</div>
+
+<script>
+    let chart; // para actualizar la gráfica
+
+    function e(t) {
+        return 2*t + 4;
+    }
+
+    function generarGrafica() {
+        let tiempoMax = parseFloat(document.getElementById("tiempoInput").value);
+
+        let tiempo = [];
+        let valores = [];
+
+        for (let t = 0; t <= tiempoMax; t += 0.1) {
+            tiempo.push(t.toFixed(1));
+            valores.push(e(t));
+        }
+
+        let tiempoDatos = [];
+        let valoresDatos = [];
+
+        for (let t = 0; t <= tiempoMax; t++) {
+            tiempoDatos.push(t);
+            valoresDatos.push(e(t));
+        }
+
+        const ctx = document.getElementById('grafica').getContext('2d');
+
+        // Si ya existe una gráfica, la destruimos
+        if (chart) {
+            chart.destroy();
+        }
+
+        chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: tiempo,
+                datasets: [
+                    {
+                        label: 'e(t) = 2t + 4',
+                        data: valores,
+                        fill: true,
+                        tension: 0.3
+                    },
+                    {
+                        label: 'Datos reales',
+                        data: valoresDatos,
+                        type: 'scatter'
+                    }
+                ]
+            },
+            options: {
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Tiempo (minutos)'
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Intentos fallidos por minuto'
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // Generar gráfica inicial
+    generarGrafica();
+</script>
+
+</body>
+</html>
