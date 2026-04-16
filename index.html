@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Intentos fallidos de login</title>
+<title>Integral de Intentos Fallidos</title>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -15,18 +15,18 @@
     }
 
     .container {
-        width: 80%;
+        width: 85%;
         margin: auto;
         background: white;
         padding: 20px;
         border-radius: 10px;
     }
 
-    input {
+    input, select {
         padding: 10px;
         font-size: 16px;
-        margin: 10px;
-        width: 100px;
+        margin: 5px;
+        width: 120px;
         text-align: center;
     }
 
@@ -35,53 +35,85 @@
         font-size: 16px;
         cursor: pointer;
     }
+
+    #resultado {
+        margin-top: 15px;
+        font-size: 18px;
+        font-weight: bold;
+    }
 </style>
 </head>
 
 <body>
 
 <div class="container">
-    <h1>Acumulación de Intentos Fallidos</h1>
+    <h1>Simulación de Integral - Ciberseguridad</h1>
 
-    <p>Ingrese el tiempo (minutos):</p>
-    <input type="number" id="tiempoInput" value="4" min="1">
-    <button onclick="generarGrafica()">Generar gráfica</button>
+    <p><strong>Selecciona el caso:</strong></p>
+    <select id="caso">
+        <option value="facebook">Caso Facebook (creciente)</option>
+        <option value="microsoft">Caso Microsoft (decreciente)</option>
+    </select>
+
+    <p><strong>Intervalo de integración:</strong></p>
+    <input type="number" id="inicio" value="0"> a
+    <input type="number" id="fin" value="4">
+
+    <br><br>
+    <button onclick="generarGrafica()">Calcular Integral</button>
+
+    <div id="resultado"></div>
 
     <canvas id="grafica"></canvas>
 </div>
 
 <script>
-    let chart; // para actualizar la gráfica
+    let chart;
 
-    function e(t) {
-        return 2*t + 4;
+    // Funciones de cada caso
+    function funcionFacebook(t) {
+        return 5*t + 10;
+    }
+
+    function funcionMicrosoft(t) {
+        return -3*t + 30;
+    }
+
+    // Integral exacta de cada función
+    function integralFacebook(a, b) {
+        return (5/2)*b*b + 10*b - ((5/2)*a*a + 10*a);
+    }
+
+    function integralMicrosoft(a, b) {
+        return (-3/2)*b*b + 30*b - ((-3/2)*a*a + 30*a);
     }
 
     function generarGrafica() {
-        let tiempoMax = parseFloat(document.getElementById("tiempoInput").value);
+        let caso = document.getElementById("caso").value;
+        let a = parseFloat(document.getElementById("inicio").value);
+        let b = parseFloat(document.getElementById("fin").value);
+
+        let f, integral;
+
+        if (caso === "facebook") {
+            f = funcionFacebook;
+            integral = integralFacebook(a, b);
+        } else {
+            f = funcionMicrosoft;
+            integral = integralMicrosoft(a, b);
+        }
 
         let tiempo = [];
         let valores = [];
 
-        for (let t = 0; t <= tiempoMax; t += 0.1) {
+        for (let t = a; t <= b; t += 0.1) {
             tiempo.push(t.toFixed(1));
-            valores.push(e(t));
-        }
-
-        let tiempoDatos = [];
-        let valoresDatos = [];
-
-        for (let t = 0; t <= tiempoMax; t++) {
-            tiempoDatos.push(t);
-            valoresDatos.push(e(t));
+            valores.push(f(t));
         }
 
         const ctx = document.getElementById('grafica').getContext('2d');
 
-        // Si ya existe una gráfica, la destruimos
-        if (chart) {
-            chart.destroy();
-        }
+        if (chart) chart.destroy();
 
         chart = new Chart(ctx, {
             type: 'line',
@@ -89,15 +121,10 @@
                 labels: tiempo,
                 datasets: [
                     {
-                        label: 'e(t) = 2t + 4',
+                        label: 'Función seleccionada',
                         data: valores,
-                        fill: true,
+                        fill: true, // área sombreada (integral)
                         tension: 0.3
-                    },
-                    {
-                        label: 'Datos reales',
-                        data: valoresDatos,
-                        type: 'scatter'
                     }
                 ]
             },
@@ -118,9 +145,11 @@
                 }
             }
         });
+
+        document.getElementById("resultado").innerHTML =
+            "Resultado de la integral: " + integral.toFixed(2) + " intentos acumulados";
     }
 
-    // Generar gráfica inicial
     generarGrafica();
 </script>
 
